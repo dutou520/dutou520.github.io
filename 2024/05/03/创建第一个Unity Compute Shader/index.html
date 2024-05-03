@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Neuxiun's Blog | Neuxiun's Blog</title><meta name="author" content="neuxiun"><meta name="copyright" content="neuxiun"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="创建第一个Unity Compute Shader前面我们提到了，使用dispatch函数来调用给定的compute shader，那么我们来制作自己的第一个compute  shader吧。 简单搭建一下场景。  最简单的处理是把RGB三个通道平均一下，产生一个灰度图像。 12345678910#pragma kernel CSMainRWTexture2D&lt;float4&gt; Re">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Neuxiun&#39;s Blog">
+<meta property="og:url" content="http://example.com/2024/05/03/%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAUnity%20Compute%20Shader/index.html">
+<meta property="og:site_name" content="Neuxiun&#39;s Blog">
+<meta property="og:description" content="创建第一个Unity Compute Shader前面我们提到了，使用dispatch函数来调用给定的compute shader，那么我们来制作自己的第一个compute  shader吧。 简单搭建一下场景。  最简单的处理是把RGB三个通道平均一下，产生一个灰度图像。 12345678910#pragma kernel CSMainRWTexture2D&lt;float4&gt; Re">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/OIGs.jpg">
+<meta property="article:published_time" content="2024-05-03T10:59:30.850Z">
+<meta property="article:modified_time" content="2024-05-03T12:00:52.797Z">
+<meta property="article:author" content="neuxiun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/OIGs.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/05/03/%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAUnity%20Compute%20Shader/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Neuxiun\'s Blog',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-05-03 20:00:52'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/OIGs.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="Neuxiun's Blog"><span class="site-name">Neuxiun's Blog</span></a></span><div id="menus"><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">无题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-05-03T10:59:30.850Z" title="发表于 2024-05-03 18:59:30">2024-05-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-05-03T12:00:52.797Z" title="更新于 2024-05-03 20:00:52">2024-05-03</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><hr>
+<hr>
+<h1 id="创建第一个Unity-Compute-Shader"><a href="#创建第一个Unity-Compute-Shader" class="headerlink" title="创建第一个Unity Compute Shader"></a>创建第一个Unity Compute Shader</h1><p>前面我们提到了，使用dispatch函数来调用给定的compute shader，那么我们来制作自己的第一个compute  shader吧。</p>
+<p>简单搭建一下场景。</p>
+<p><img src="/%5Cpictures%5C%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAcompute%20shader%5Csc001%20(4).png" alt="sc001 (4).png" title="场景"></p>
+<p>最简单的处理是把RGB三个通道平均一下，产生一个灰度图像。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#pragma kernel CSMain</span><br><span class="line">RWTexture2D&lt;float4&gt; Result;</span><br><span class="line"></span><br><span class="line">[numthreads(8,8,1)]</span><br><span class="line">void CSMain (uint3 id : SV_DispatchThreadID)</span><br><span class="line">&#123;</span><br><span class="line">    float4 color = Result[id.xy];</span><br><span class="line">    float grey=0.33*(color.x+color.y+color.z);</span><br><span class="line">    Result[id.xy] = float4(grey,grey,grey,0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来是在C#脚本中调用它。这里作者踩了一个坑。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> System.Collections;</span><br><span class="line"><span class="keyword">using</span> System.Collections.Generic;</span><br><span class="line"><span class="keyword">using</span> UnityEngine;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">My1stCom</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Start is called before the first frame update</span></span><br><span class="line">    <span class="keyword">public</span> ComputeShader C_1st;</span><br><span class="line">    <span class="comment">// public int size;</span></span><br><span class="line">    <span class="keyword">public</span> RenderTexture renderTexture;</span><br><span class="line">    <span class="keyword">private</span> <span class="built_in">int</span> _kernel;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Start</span>()</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//获取核函数的序号</span></span><br><span class="line">        _kernel=C_1st.FindKernel(<span class="string">&quot;CSMain&quot;</span>);</span><br><span class="line">        renderTexture.enableRandomWrite = <span class="literal">true</span>;</span><br><span class="line">        <span class="comment">//设置渲染目标</span></span><br><span class="line">        C_1st.SetTexture(_kernel,<span class="string">&quot;Result&quot;</span>, renderTexture);</span><br><span class="line">        <span class="comment">//由于作者只想调用一次，所以直接在start里调用了</span></span><br><span class="line">        C_1st.Dispatch (_kernel,<span class="number">8</span>,<span class="number">8</span>,<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里另外说明一下：Dispatch函数用于告诉GPU，分配多少个线程组去运算compute shader。我们已经了解到，在compute shader中指定了一个线程组的线程数量，那么我们在计算这个部分的时候，GPU一共使用了8x8x1x8x8x1个线程。</p>
+<p>创建了一个renderTexture和一个材质球：</p>
+<p><img src="/%5Cpictures%5C%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAcompute%20shader%5C2024-04-30-20-52-30-image.png" alt="2024-04-30-20-52-30-image.png"></p>
+<p>把renderTexture绑定到材质球的自发光和基础色上</p>
+<p><img src="/%5Cpictures%5C%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAcompute%20shader%5C2024-04-30-20-53-38-image.png" alt="2024-04-30-20-53-38-image.png"></p>
+<p>点击运行，得到两个报错：</p>
+<img title="" src="\pictures/创建第一个compute%20shader/2024-04-30-20-47-19-image.png" alt="2024-04-30-20-47-19-image.png" data-align="center" width="246">
+
+<p>显然，我们不能把已经创建的rendertexuture设置为允许随机读写，并且它不能被识别为<em>纹理单元（UAV）</em>。</p>
+<p>修改思路，先输出一张UV试试。</p>
+<p>由于只能获取到线程的位置，因此只能得到线程的UV图，那么修改代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#pragma kernel CSMain</span><br><span class="line">RWTexture2D&lt;float4&gt; Result;</span><br><span class="line">[numthreads(8,8,1)]</span><br><span class="line">void CSMain (uint3 id : SV_DispatchThreadID)</span><br><span class="line">&#123;</span><br><span class="line">    Result[id.xy] =float4((id.xy/8.0)%1,0,0); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们使用这个线程在线程组中的位置来计算颜色，由于线程组是8x8的大小，那么我们需要除以8得到小数，然后再求1的余数，得到小数部分，确保不会超出1（超出1的部分是不可预知的，不同设备上的表现可能不同，hlsl并没有提供舍弃整数部分的API，因而这样处理。）</p>
+<p>修改C#代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">using System.Collections;</span><br><span class="line">using System.Collections.Generic;</span><br><span class="line">using UnityEngine;</span><br><span class="line"></span><br><span class="line">public class My1stCom : MonoBehaviour</span><br><span class="line">&#123;</span><br><span class="line">    public ComputeShader C_1st;</span><br><span class="line">     public int size;</span><br><span class="line">    private int _kernel;</span><br><span class="line">    public Material _mat;</span><br><span class="line">    void Start()</span><br><span class="line">    &#123;</span><br><span class="line">        //创建一个RenderTexture</span><br><span class="line">        RenderTexture renderTexture= new RenderTexture (size, size, 0);;</span><br><span class="line">        //获取核函数的序号</span><br><span class="line">        _kernel=C_1st.FindKernel(&quot;CSMain&quot;);</span><br><span class="line">        //设置允许随机读写</span><br><span class="line">        renderTexture.enableRandomWrite = true;</span><br><span class="line">        renderTexture.Create ();</span><br><span class="line">        //设置为自发光材质</span><br><span class="line">        _mat.SetTexture (&quot;_EmissionMap&quot;, renderTexture);</span><br><span class="line">        //设置渲染目标</span><br><span class="line">        C_1st.SetTexture(_kernel,&quot;Result&quot;, renderTexture);</span><br><span class="line">        //调用shader</span><br><span class="line">        C_1st.Dispatch (_kernel, Mathf.CeilToInt(size / 8f), Mathf.CeilToInt(size / 8f), 1);</span><br><span class="line">    &#125;</span><br><span class="line">    void Update()</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们使用了代码来创建RenderTexture，这样的RenderTexture可以杯设置为允许随机写入（因为每个线程完成计算的时间是不可确定的）</p>
+<p>那么现在我们点击运行，得到结果：</p>
+<p><img src="/%5Cpictures%5C%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAcompute%20shader%5C2024-04-30-21-54-19-image.png" alt="2024-04-30-21-54-19-image.png"></p>
+<p>现在我们成功使用了compute shader进行运算。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">neuxiun</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/05/03/%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAUnity%20Compute%20Shader/">http://example.com/2024/05/03/%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAUnity%20Compute%20Shader/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Neuxiun's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/OIGs.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2018/01/05/Unity%20Compute%20Shader%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%B8%80%EF%BC%89/" title="unity compute shader学习（一）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">unity compute shader学习（一）</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/OIGs.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">neuxiun</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/dutou520"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">联系我请使用QQ邮箱：1941597363@qq.com</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAUnity-Compute-Shader"><span class="toc-number">1.</span> <span class="toc-text">创建第一个Unity Compute Shader</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/05/03/%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AAUnity%20Compute%20Shader/" title="无题">无题</a><time datetime="2024-05-03T10:59:30.850Z" title="发表于 2024-05-03 18:59:30">2024-05-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2018/01/05/Unity%20Compute%20Shader%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%B8%80%EF%BC%89/" title="unity compute shader学习（一）">unity compute shader学习（一）</a><time datetime="2018-01-04T16:00:00.000Z" title="发表于 2018-01-05 00:00:00">2018-01-05</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By neuxiun</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
